@@ -1,25 +1,67 @@
 var jwt = require('jsonwebtoken');
+var Usuario = require('../models/user');
 
 module.exports = function(app){
 	var api = {};
 
-	api.login = function(req,res){
-		var usuario = {};
-		usuario.login = req.body.login;
-		usuario.password = req.body.password;
-
-		// verificar o usuario no banco de dados
-		if (usuario.login != 'jurasseck' || usuario.password != '123') {
-			res.sendStatus(401);
-		}
-
-		// Se estiver tudo ok ele gera o token, adiciona no header e devolve a resposta para o back-end
-		var token = jwt.sign({usuario: usuario.login}, app.get('secret'), {
-			expiresIn: 84600
+	api.default = function(req,res){
+		var user = new Usuario({
+			name: 'Administrador',
+			username: 'admin',
+			password: 'admin'
 		});
 
-		res.set('x-access-token', token);
-		res.end();
+		user.save(function(err){
+			if (err) {
+				res.sendStatus(500);
+			}
+			res.sendStatus(200);
+		});
+	}
+
+	api.login = function(req,res){
+		var q = {
+			'username': req.body.username,
+			'password': req.body.password
+		};
+
+		Usuario.findOne(q,function(err, user){
+			if (err) {
+				res.sendStatus(401);
+			}
+
+			var token = jwt.sign({usuario: user.username}, app.get('secret'), {
+				expiresIn: 84600
+			});
+
+			res.set('x-access-token', token);
+			res.end();
+		});
+	}
+
+	api.create = function(req,res){
+		var user = new Usuario({
+			name: req.body.name,
+			username: req.body.username,
+			password: req.body.password
+		});
+
+		user.save(function(err){
+			if (err) {
+				res.sendStatus(500);
+			}
+			res.sendStatus(200);
+		});
+	}
+
+	api.list = function(req,res){
+		Usuario.find(function(err, users){
+			if (err) {
+				res.sendStatus(500);
+			}
+
+			res.json(users);
+		});
 	}
 
 	api.verificaToken = function(req,res,next){
