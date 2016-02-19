@@ -21,14 +21,23 @@ module.exports = function(app){
 
 	api.login = function(req,res){
 		var q = {
-			'username': req.body.username,
-			'password': req.body.password
+			'username': req.body.login
 		};
 
 		Usuario.findOne(q,function(err, user){
 			if (err) {
 				res.sendStatus(401);
 			}
+
+			user.comparePassword(req.body.password, function(err, isMatch){
+				if (err) {
+					res.sendStatus(401);
+				}
+
+				if (!isMatch) {
+					res.sendStatus(401);
+				}
+			})
 
 			var token = jwt.sign({usuario: user.username}, app.get('secret'), {
 				expiresIn: 84600

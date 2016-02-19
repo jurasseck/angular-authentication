@@ -9,5 +9,6 @@ module.exports = function(app){
 	app.get('/naopode', api.teste);
 	app.get('/xama', api.xama);
 
+	app.post('/create', api.create);
 	app.get('/list', api.list);
 }
