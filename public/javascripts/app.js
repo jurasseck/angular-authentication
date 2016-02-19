@@ -15,10 +15,15 @@ angular.module('app', ['ngRoute'])
 	});
 });
 
-angular.module('app').controller('homeController', function($scope, $http){
+angular.module('app').controller('homeController', function($scope, $http, $window, $location){
 	$scope.local = 'Home';
 	$scope.retorno = '';
 	$scope.err = '';
+
+	$scope.sair = function(){
+		delete $window.localStorage.token;
+		$location.path('/login');
+	}
 
 	$scope.callUrl = function(url){
 		$http.get('/'+url).then(function(data){
@@ -37,8 +42,6 @@ angular.module('app').controller('homeController', function($scope, $http){
 		var usuario = $scope.usuario;
 		$http.post('/login', usuario)
 		.then(function(){
-			$scope.usuario = {};
-			$scope.mensagem = '';
 			$location.path('/');
 		},function(err){
 			$scope.mensagem = 'DEU ERRO';
@@ -51,7 +54,7 @@ angular.module('app').controller('homeController', function($scope, $http){
 		var token = response.headers('x-access-token');
 
 		if (token) {
-			$window.sessionStorage.token = token;
+			$window.localStorage.token = token;
 		}
 
 		return response;
@@ -60,8 +63,8 @@ angular.module('app').controller('homeController', function($scope, $http){
 	interceptor.request = function(config){
 		config.headers = config.headers || {};
 
-		if ($window.sessionStorage.token) {
-			config.headers['x-access-token'] = $window.sessionStorage.token;
+		if ($window.localStorage.token) {
+			config.headers['x-access-token'] = $window.localStorage.token;
 		}
 
 		return config;
@@ -70,7 +73,7 @@ angular.module('app').controller('homeController', function($scope, $http){
 
 	interceptor.responseError = function(rejection){
 		if (rejection != null && rejection.status == 401) {
-			delete $window.sessionStorage.token;
+			delete $window.localStorage.token;
 			$location.path('/login');
 		}
 		return $q.reject(rejection);

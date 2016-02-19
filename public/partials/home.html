@@ -1,11 +1,9 @@
 <div class="row">
 	<h1>{{local}}</h1>
-	<button ng-click="callUrl('xama')">XAMA</button>
-	<button ng-click="callUrl('pode')">PODE</button>
-	<button ng-click="callUrl('naopode')">N PODE</button>
+	<button ng-click="callUrl('list')" class="btn btn-primary">Listar usuários</button>
+	<button ng-click="sair()" class="btn btn-danger pull-right">Sair</button>
 	<hr>
 	<pre>
-		{{retorno}}
+	<p ng-repeat="user in retorno">{{user.name}} - {{user.username}} - {{user.password}}</p>
 	</pre>
-
 </div>
